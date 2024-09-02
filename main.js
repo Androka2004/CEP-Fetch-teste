@@ -1,19 +1,28 @@
 async function requestCEP(cep) {
     const resource = `https://viacep.com.br/ws/${cep}/json/`
     
-    const rest = await fetch(resource).catch (error => {
-        document.getElementById('cepError').classList.remove('hidden')
-        form.classList.add('input-cep-error')
-        return false
-    })
+    const rest = await fetch(resource)
+        .catch (error => { 
+            return false
+        })
+    const data = await rest.json()
     
-    return rest? rest.json() : false
+    return data.erro? false : data
 }
 
 async function preencherForm(cep) {
     const CepInfo = await requestCEP(cep)
 
-    if (CepInfo == false) {return}
+    if (CepInfo == false) {
+        document.getElementById('cepError').classList.remove('hidden')
+        form.classList.add('input-cep-error')
+        document.getElementById('street').value = null
+        document.getElementById('neighborhood').value = null 
+        document.getElementById('state').value = null 
+        document.getElementById('city').value = null 
+        return
+    }
+        
     else if(document.getElementById('cepError').classList.length == 0 ){
         document.getElementById('cepError').classList.add('hidden')
         form.classList.remove('input-cep-error')
@@ -27,8 +36,8 @@ async function preencherForm(cep) {
 }
 
 const form = document.getElementById('cep')
-form.addEventListener('keyup', (e) => {
+form.addEventListener('keyup', async (e) => {
     if (e.key == 'Enter') {
-            preencherForm(form.value)
+            await preencherForm(form.value)
     }
 })
